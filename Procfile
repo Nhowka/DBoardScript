@@ -1,1 +1,1 @@
-web: fsharpi-heroku app.fsx
+web: fsharpc-heroku app.fsx
