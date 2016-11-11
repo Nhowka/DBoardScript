@@ -6,9 +6,25 @@ Paket.Dependencies.Install (System.IO.File.ReadAllText "paket.dependencies")
 #endif
 
 //---------------------------------------------------------------------
-
+#I "packages/WebSharper/lib/net40"
+#I "packages/WebSharper.UI.Next/lib/net40"
+#I "packages/Microsoft.Owin/lib/net45"
+#I "packages/WebSharper.Owin/lib/net45"
+#I "packages/WebSharper.Suave/lib/net45"
 #I "packages/Suave/lib/net40"
+#I "packages/Mono.Cecil/lib/net40"
+#I "packages/Owin/lib/net40"
+#r "packages/WebSharper.Suave/lib/net45/WebSharper.Suave.dll"
 #r "packages/Suave/lib/net40/Suave.dll"
+#r "packages/WebSharper.UI.Next/lib/net40/WebSharper.UI.Next.dll"
+#r "packages/WebSharper.UI.Next/lib/net40/WebSharper.UI.Next.Templating.dll"
+#r "packages/WebSharper/lib/net40/WebSharper.Main.dll"
+#r "packages/WebSharper/lib/net40/WebSharper.Web.dll"
+#r "packages/WebSharper/lib/net40/WebSharper.Sitelets.dll"
+#r "packages/WebSharper/lib/net40/WebSharper.Core.dll"
+#r "packages/WebSharper/lib/net40/WebSharper.Javascript.dll"
+#r "packages/WebSharper/lib/net40/WebSharper.Core.Javascript.dll"
+
 
 open System
 open Suave                 // always open suave
@@ -18,89 +34,87 @@ open Suave.Successful // for OK-result
 open Suave.Web             // for config
 open System.Net
 open Suave.Operators 
+open WebSharper
+open WebSharper.JavaScript
+open WebSharper.UI.Next
+open WebSharper.UI.Next.Client
+open WebSharper.UI.Next.Html
+open WebSharper.Sitelets
+open WebSharper.UI.Next.Server
 
-printfn "initializing script..."
+module Server =
 
-let species = 
-  [("Plant (tree)", "Baishan Fir"); ("Insect (butterfly)", "");
-   ("Reptile", "Leaf scaled sea-snake");
-   ("Insect (damselfly)", "Amani flatwing"); ("Bird", "Araripe manakin");
-   ("Insect", "(earwig)"); ("Fish", "Aci Göl toothcarp");
-   ("Mammal (bat)", "Bulmer’s fruit bat"); ("Bird", "White bellied heron");
-   ("Bird", "Great Indian bustard");
-   ("Reptile (tortoise)", "Ploughshare tortoise Angonoka");
-   ("Amphibian (toad)", "Rio Pescado stubfoot toad");
-   ("Bird", "Madagascar pochard"); ("Fish", "Galapagos damsel fish");
-   ("Fish", "Giant yellow croaker");
-   ("Reptile (turtle)", "Common batagur Four-toed terrapin");
-   ("Plant", "(liverwort)"); ("Mammal", "Hirola (antelope)");
-   ("Insect (bee)", "Franklin’s bumblebee");
-   ("Mammal (primate)", "Northern muriqui woolly spider monkey");
-   ("Mammal", "Pygmy three-toed sloth");
-   ("Plant (freshwater)", "(water-starwort)");
-   ("Reptile", "Tarzan’s chameleon");
-   ("Mammal (rodent)", "Santa Catarina’s guinea pig");
-   ("Mammal (primate)", "Roloway guenon (monkey)");
-   ("Mammal (bat)", "Seychelles sheath-tailed bat");
-   ("Fungi", "Willow blister");
-   ("Mammal (shrew)", "Nelson’s small-eared shrew");
-   ("Reptile", "Jamaican iguana Jamaican rock iguana");
-   ("Plant (orchid)", "Cayman Islands ghost orchid");
-   ("Mammal (rhino)", "Sumatran rhino"); ("Bird", "Amsterdam albatross");
-   ("Plant", "Wild yam"); ("Plant (tree)", ""); ("Plant (tree)", "");
-   ("Amphibian (frog)", "Hula painted frog"); ("Plant", "");
-   ("Plant (tree)", ""); ("Amphibian (frog)", "La Hotte glanded frog");
-   ("Amphibian (frog)", "Macaya breast-spot frog");
-   ("Plant", "Chilenito (cactus)"); ("Plant (tree)", "Coral tree");
-   ("Plant (tree)", ""); ("Bird", "Spoon-billed sandpiper"); ("Plant", "");
-   ("Bird", "Northern bald ibis");
-   ("Plant", "(flowering plant in legume family)");
-   ("Mollusc", "(type of gastropod)");
-   ("Amphibian (frog)", "Table mountain ghost frog");
-   ("Mollusc", "(type of land snail)"); ("Bird", "Liben lark");
-   ("Plant (small tree)", ""); ("Fish", "Sakhalin taimen");
-   ("Crustacean", "Singapore freshwater crab");
-   ("Plant",
-    "Belin vetchling (flowering plant related to Lathyrus odoratus)");
-   ("Amphibian (frog)", "Archey’s frog");
-   ("Amphibian (frog)", "Dusky gopher frog"); ("Bird", "Edwards’s pheasant");
-   ("Plant", "(type of Magnolia tree)");
-   ("Mollusc", "(type of freshwater mussel)"); ("Mollusc", "(snail)");
-   ("Mammal (bat)", "Cuban greater funnel eared bat");
-   ("Plant", "Attenborough’s pitcher plant");
-   ("Mammal (primate)", "Hainan gibbon"); ("Amphibian", "Luristan newt");
-   ("Insect (damselfly)", "Mulanje red damsel (damselfly)");
-   ("Fish", "Pangasid catfish"); ("Insect (butterfly)", "(butterfly)");
-   ("Mammal (cetacean)", "Vaquita (porpoise)");
-   ("Plant (tree)", "Type of spruce tree"); ("Plant (tree)", "Qiaojia pine");
-   ("Spider","Gooty tarantula, metallic tarantula, peacock parachute spider)");
-   ("Bird", "Fatuhiva monarch"); ("Fish", "Common sawfish");
-   ("Mammal (primate)", "Greater bamboo lemur");
-   ("Mammal (primate)", "Silky sifaka");
-   ("Reptile (tortoise)", "Geometric tortoise"); ("Mammal", "Saola");
-   ("Plant", ""); ("Insect", "Beydaglari bush-cricket");
-   ("Reptile (turtle)", "Red River giant softshell turtle");
-   ("Mammal (rhino)", "Javan rhino");
-   ("Mammal (primate)", "Tonkin snub-nosed monkey");
-   ("Plant (orchid)", "West Australian underground orchid");
-   ("Mammal (shrew)", "Boni giant sengi");
-   ("Insect (damselfly)", "Cebu frill-wing (damselfly)"); ("Plant", "");
-   ("Mammal", "Durrell’s vontsira (type of mongoose)");
-   ("Mammal (rodent)", "Red crested tree rat");
-   ("Fish", "Red-finned Blue-eye"); ("Fish (shark)", "Angel shark");
-   ("Bird", "Chinese crested tern"); ("Fish", "Estuarine pipefish");
-   ("Plant", "Suicide Palm Dimaka");
-   ("Amphibian (frog)", "Bullock’s false toad");
-   ("Mammal (rodent)", "Okinawa spiny rat"); ("Fish", "Somphongs’s rasbora");
-   ("Fish", ""); ("Plant", "Forest coconut");
-   ("Mammal", "Attenborough’s echidna")]
+    [<Rpc>]
+    let DoSomething input =
+        let R (s: string) = System.String(Array.rev(s.ToCharArray()))
+        async {
+            return R input
+        }
 
-let speciesSorted = 
-    species 
-      |> Seq.countBy fst 
-      |> Seq.sortBy (snd >> (~-))
-      |> Seq.toList
+[<JavaScript>]
+module Client =
 
+    let Main () =
+        let rvInput = Var.Create ""
+        let submit = Submitter.CreateOption rvInput.View
+        let vReversed =
+            submit.View.MapAsync(function
+                | None -> async { return "" }
+                | Some input -> Server.DoSomething input
+            )
+        
+        div [
+            script [text "var ws = new WebSocket(document.URL.replace('http','ws')+'ws'); ws.onmessage=function(msg){CoolBox.innerHTML=msg.data;};"]
+            Doc.Input [] rvInput
+            Doc.Button "Send" [] submit.Trigger
+            hr []
+            h4Attr [attr.``class`` "text-muted"] [text "The server responded:"]
+            divAttr [attr.``class`` "jumbotron"] [h1Attr [Attr.Create "id" "CoolBox"] [textView vReversed]]
+        ]
+
+module SocketCommunication =
+    open Suave.WebSocket
+    open Suave.Sockets
+    open Suave.Sockets.Control
+    open Suave.Http
+    open System
+
+    let pushServer (webSocket : WebSocket) =
+        fun (cx : HttpContext) ->
+            socket {
+                let loop = ref true
+                while !loop do
+                    let! msg = webSocket.read()
+                    match msg with
+                    | (Text, data, true) ->
+                        do! webSocket.send Text (Array.concat [ "Websocket: " |> System.Text.Encoding.Default.GetBytes
+                                                                cx.connection.socketBinding.ip.GetAddressBytes()
+                                                                data ]) true
+                    | (Ping, _, _) -> do! webSocket.send Pong ([||]) true
+                    | (Close, _, _) ->
+                        do! webSocket.send Close ([||]) true
+                        loop := false
+                    | _ -> ()
+            }
+
+type EndPoint =
+    | [<EndPoint"/">] Home
+    | [<EndPoint"/about">] About
+
+module Templating =
+
+    type MainTemplate = Templating.Template< "Main.html" >
+
+    // Compute a menubar where the menu item for the given endpoint is active
+    let MenuBar (ctx : Context<EndPoint>) endpoint : Doc list =
+        let (=>) txt act =
+            liAttr [ if endpoint = act then yield attr.``class`` "active" ]
+                [ aAttr [ attr.href (ctx.Link act) ] [ text txt ] ]
+        [ li [ "Home" => EndPoint.Home ]
+          li [ "About" => EndPoint.About ] ]
+
+    let Main ctx action title body =
+        Content.Page(MainTemplate.Doc(title = title, menubar = MenuBar ctx action, body = body))
 
 let config = 
     let port = System.Environment.GetEnvironmentVariable("PORT")
@@ -112,117 +126,48 @@ let config =
         bindings=[ (if port = null then HttpBinding.mk HTTP ip127 (uint16 8080)
                     else HttpBinding.mk HTTP ipZero (uint16 port)) ] }
 
-let text = 
-    [ yield "<html><body><ul>"
-      for (category,count) in speciesSorted do
-         yield sprintf "<li>Category <b>%s</b>: <b>%d</b></li>" category count 
-      yield "</ul></body></html>" ]
-    |> String.concat "\n"
+module Site =
+    open WebSharper.UI.Next.Html
 
-let angularHeader = """<head>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
-</head>"""
+    let HomePage ctx =
+        Templating.Main ctx EndPoint.Home "Home" [ h1 [ text "Say Hi to the server!" ]
+                                                   div [ client <@ Client.Main() @> ] ]
 
-let animalsText = 
-    [ yield """<html>"""
-      yield angularHeader
-      yield """ <body>"""
-      yield """ <h1>Endangered Animals</h1>"""
-      yield """  <table class="table table-striped">"""
-      yield """   <thead><tr><th>Category</th><th>Count</th></tr></thead>"""
-      yield """   <tbody>"""
-      for (category,count) in speciesSorted do
-         yield sprintf "<tr><td>%s</td><td>%d</td></tr>" category count 
-      yield """   </tbody>"""
-      yield """  </table>"""
-      yield """ </body>""" 
-      yield """</html>""" ]
-    |> String.concat "\n"
+    let AboutPage ctx =
+        Templating.Main ctx EndPoint.About "About"
+            [ h1 [ text "About" ]
+              p [ text "This is a template WebSharper client-server application." ] ]
 
-let thingsText n = 
-    [ yield """<html>"""
-      yield angularHeader
-      yield """ <body>"""
-      yield """ <h1>Endangered Animals</h1>"""
-      yield """  <table class="table table-striped">"""
-      yield """   <thead><tr><th>Thing</th><th>Value</th></tr></thead>"""
-      yield """   <tbody>"""
-      for i in 1 .. n do
-         yield sprintf "<tr><td>Thing %d</td><td>%d</td></tr>" i i  
-      yield """   </tbody>"""
-      yield """  </table>"""
-      yield """ </body>""" 
-      yield """</html>""" ]
-    |> String.concat "\n"
+    let Main =
+        Application.MultiPage(fun ctx endpoint ->
+            match endpoint with
+            | EndPoint.Home -> HomePage ctx
+            | EndPoint.About -> AboutPage ctx)
 
-let homePage = 
-    [ yield """<html>"""
-      yield angularHeader 
-      yield """ <body>"""
-      yield """ <h1>Sample Web App</h1>"""
-      yield """  <table class="table table-striped">"""
-      yield """   <thead><tr><th>Page</th><th>Link</th></tr></thead>"""
-      yield """   <tbody>"""
-      yield """      <tr><td>Endangered Animals</td><td><a href="/animals">Link to animals</a></td></tr>""" 
-      yield """      <tr><td>Things</td><td><a href="/things/10">Link to things (10)</a></td></tr>""" 
-      yield """      <tr><td>Things</td><td><a href="/things/100">Link to things (100)</a></td></tr>""" 
-      yield """      <tr><td>API JSON</td><td><a href="/api/json/100">Link to result (100)</a></td></tr>"""
-      yield """      <tr><td>API XML</td><td><a href="/api/xml/100">Link to result (100)</a></td></tr>"""
-      yield """      <tr><td>API JSON</td><td><a href="/api/json/10">Link to result (10)</a></td></tr>"""
-      yield """      <tr><td>API XML</td><td><a href="/api/xml/10">Link to result (10)</a></td></tr>"""
-      yield """      <tr><td>Goodbye</td><td><a href="/goodbye">Link</a></td></tr>"""
-      yield """   </tbody>"""
-      yield """  </table>"""
-      yield """ </body>""" 
-      yield """</html>""" ]
-    |> String.concat "\n"
+    open Suave.WebPart
+    open WebSharper.Suave
+    open Suave.Web
+    open Suave.Filters
+    open Suave.WebSocket
+    open Suave.Operators
+    open Suave.Http
+    open System.Net
+    open Suave.Logging
 
-printfn "starting web server..."
+    let endpoints =
+        choose [ path "/ws" >=> handShake SocketCommunication.pushServer
+                 (WebSharperAdapter.ToWebPart Main) ]
 
-let jsonText n = 
-    """
-{"menu": {
-  "id": "file",
-  "value": "File",
-  "popup": {
-    "result": [
-""" + String.concat "\n"
-      [ for i in 1 .. n -> sprintf """{"value": "%d"},""" i ] + """
-    ]
-  }
-}}""" 
+    let config =
+        let port = System.Environment.GetEnvironmentVariable("PORT")
+        let ip127 = IPAddress.Parse("127.0.0.1")
+        let ipZero = IPAddress.Parse("0.0.0.0")
+        { defaultConfig with 
+                        logger = Logging.Loggers.saneDefaultsFor Logging.LogLevel.Verbose
+                        bindings =
+                                 [ (if port = null then HttpBinding.mk HTTP ip127 (uint16 8083)
+                                    else HttpBinding.mk HTTP ipZero (uint16 port)) ] }
 
-let xmlText n = 
-    """
-<menu id="file" value="File">
-  <popup>
-""" + String.concat "\n"
-      [ for i in 1 .. n -> sprintf """<menuitem value="%d" />""" i ] + """
-    <menuitem value="Open" />
-    <menuitem value="Close"  />
-  </popup>
-</menu>""" 
-
-let xmlMime = Writers.setMimeType "application/xml"
-let jsonMime = Writers.setMimeType "application/json"
-let app = 
-  choose
-    [ GET >=> choose
-                [ path "/" >=> OK homePage
-                  path "/animals" >=> OK animalsText
-                  pathScan "/things/%d" (fun n -> OK (thingsText n))
-                  path "/api/json" >=> jsonMime >=> OK (jsonText 100)
-                  pathScan "/api/json/%d" (fun n -> jsonMime >=> OK (jsonText n))
-                  path "/api/xml" >=> xmlMime >=> OK (xmlText 100)
-                  pathScan "/api/xml/%d" (fun n -> xmlMime >=> OK (xmlText n))
-                  path "/goodbye" >=> OK "Good bye GET" ]
-      POST >=> choose
-                [ path "/hello" >=> OK "Hello POST"
-                  path "/goodbye" >=> OK "Good bye POST" ] ]
-    
-
-startWebServer config app
-printfn "exiting server..."
+    do startWebServer config endpoints
 
 
