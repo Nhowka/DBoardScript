@@ -23,7 +23,6 @@ Paket.Dependencies.Install (System.IO.File.ReadAllText "paket.dependencies")
 #r "packages/WebSharper/lib/net40/WebSharper.Sitelets.dll"
 #r "packages/WebSharper/lib/net40/WebSharper.Core.dll"
 #r "packages/WebSharper/lib/net40/WebSharper.Javascript.dll"
-#r "packages/WebSharper/lib/net40/WebSharper.Core.Javascript.dll"
 
 
 open System
@@ -115,16 +114,6 @@ module Templating =
 
     let Main ctx action title body =
         Content.Page(MainTemplate.Doc(title = title, menubar = MenuBar ctx action, body = body))
-
-let config = 
-    let port = System.Environment.GetEnvironmentVariable("PORT")
-    let ip127  = IPAddress.Parse("127.0.0.1")
-    let ipZero = IPAddress.Parse("0.0.0.0")
-
-    { defaultConfig with 
-        logger = Logging.Loggers.saneDefaultsFor Logging.LogLevel.Verbose
-        bindings=[ (if port = null then HttpBinding.mk HTTP ip127 (uint16 8080)
-                    else HttpBinding.mk HTTP ipZero (uint16 port)) ] }
 
 module Site =
     open WebSharper.UI.Next.Html
