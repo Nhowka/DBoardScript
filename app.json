@@ -5,6 +5,6 @@
   "repository": "https://github.com/Nhowka/DBoardScript/",
   "logo": "https://github.com/SuaveIO/resources/raw/master/images/head_trans.png",
   "env": {
-    "BUILDPACK_URL": "https://github.com/SuaveIO/mono-script-buildpack.git"
+    "BUILDPACK_URL": "https://github.com/Nhowka/mono-script-buildpack.git"
   }
 }
